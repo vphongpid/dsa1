@@ -142,17 +142,17 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
             switch(request.code[1]) {
                 case 'N': {
                     switch(request.code[2]) {
-                        case 'V': {
+                        case 'V': {                                             //CNV
                             cout<<"CNV: ";
                             cout << pGList->NewDataList.getSize() << endl;
                             break;
                         }
-                        case 'R': {
+                        case 'R': {                                             //CNR
                             cout<< "CNR: ";
                             cout <<  pGList->CopyDataList.getSize() << endl;
                             break;
                         }
-                        default: {
+                        case 'S': {                                        //CNS
                             L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
                             // int t = 0;
                             // char** idmove=new char*[pGList->NewDataList.getSize()];
@@ -185,30 +185,47 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                                 cout << idmove;
                                 cout<<endl;
                             }
+                            break;
+                        }
+                        default: {  
+                            cout<<request.code<<": Failed"<<endl; 
+                            break;
                         }
                     }
                     break;
                 }
-                default: {
-                    L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
-                    double sumdis=0 ;
-                    double record= 0;
-                    double device= 0;
-                    while (pFirst!= NULL){
-                        L1Item<VRecord>* child = pFirst->data.getpHead();
-                        record=pFirst->data.getSize();
-                        while (child->pNext != NULL)
-                        {
-                            sumdis =   sumdis + distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x)*1000;
-                            child=child->pNext;
+                case 'A': {                          //CAS
+                    switch(request.code[2]) {
+                        case 'S': {
+                            L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
+                            double sumdis=0 ;
+                            double record= 0;
+                            double device= 0;
+                            while (pFirst!= NULL){
+                                L1Item<VRecord>* child = pFirst->data.getpHead();
+                                record=pFirst->data.getSize();
+                                while (child->pNext != NULL){
+                                    sumdis =   sumdis + distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x)*1000;
+                                    child=child->pNext;
+                                }
+                            device = device + record - 1;
+                            pFirst=pFirst->pNext;
+                            } 
+                            cout<<"CAS: ";
+                            cout<< sumdis/device <<" meter"<<endl ;
+                            break;
                         }
-                        device = device + record - 1;
-                        pFirst=pFirst->pNext;
-                    } 
-                    cout<<"CAS: ";
-                    cout<<setprecision(6) << sumdis/device <<" meter"<<endl ;
+                        default: {
+                            cout<<request.code<<": Failed"<<endl; 
+                            break;
+                        }
+                    }
                     break;
                 }    //// CAS
+                default: {
+                  cout<<request.code<<": Failed"<<endl; 
+                  break;
+                }
             }
             break;
         }
@@ -216,7 +233,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
             switch(request.code[1]) {
                 case 'F': {
                     switch(request.code[2]) {
-                        case 'F': {
+                        case 'F': {             //VFF
                             /*
                             L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
                             L1Item<VRecord>* pFF = pFirst->data.getpHead();
@@ -228,7 +245,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                             //printVRecord(pGList->NewDataList.getpHead()->data.getpHead()->data);
                             break;
                         }
-                        case 'L': {
+                        case 'L': {                     //VFL
                             cout<<"VFL: ";
                             //L1Item<VRecord>* 
                             L1Item<L1List<VRecord>>*Lastitem = pGList->NewDataList.getpHead();
@@ -238,7 +255,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                             cout <<Lastitem->data.getpHead()->data.id <<endl;
                             break;
                         }
-                        case 'Y': {
+                        case 'Y': {                     //VFY
                             string y= (string)request.code;
                             int flag=0;
                             string tempID;
@@ -254,7 +271,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                                     flag=1;
                                     cout<<y;
                                     cout<<": ";
-                                    cout<< setprecision(6) << pFirst->data.getpHead()->data.y;
+                                    cout<< pFirst->data.getpHead()->data.y;
                                     cout<<endl;
                                     break;
                                 }
@@ -267,7 +284,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                             }
                             break;   
                         }
-                        case 'X': {
+                        case 'X': {                 //VFX
                             string y= (string)request.code;
                             int flag=0;
                             string tempID;
@@ -283,7 +300,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                                     flag=1;
                                     cout<<y;
                                     cout<<": ";
-                                    cout<< setprecision(6) << pFirst->data.getpHead()->data.x;
+                                    cout<< pFirst->data.getpHead()->data.x;
                                     cout<<endl;
                                     break;
                                 }
@@ -296,7 +313,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                             }
                             break;   
                         }
-                        case 'T': {
+                        case 'T': {             //VFT
                             string y= (string)request.code;
                             int flag=0;
                             string tempID;
@@ -307,7 +324,6 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                             char* tID=strtok(request.code,s);
                             tID=strtok(NULL,s);
                             rID=(string)tID;
-
                             L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
                             while (pFirst!= NULL){
                                 tempID=(string)pFirst->data.getpHead()->data.id;
@@ -331,7 +347,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                             }
                             break;
                         }
-                        default: {
+                        case 'S': {        //VFS
                             string y= (string)request.code;
                             int flag=0;
                             string tempID;
@@ -348,7 +364,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                                 tempID=(string)child->data.id;
                                 if (tempID==rID){
                                     while (child->pNext != NULL){
-                                        if (distanceVR(child->data.x,child->data.y,child->pNext->data.x,child->pNext->data.y) == 0){
+                                        if (distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x) == 0){
                                             tempx=child->pNext->data.x;
                                             tempy=child->pNext->data.y;
                                             flag=1;
@@ -375,12 +391,16 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                             }
                             break;
                         }
+                        default: {
+                            cout<<request.code<<": Failed"<<endl;
+                            break;
+                        }
                     }
                     break;
                 }
                 case 'L': {
                     switch(request.code[2]) {
-                        case 'Y': {
+                        case 'Y': {                     //VLY
                             string y= (string)request.code;
                             int flag=0;
                             string tempID;
@@ -401,7 +421,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                                     flag=1;
                                     cout<<y;
                                     cout<<": ";
-                                    cout<< setprecision(6) << child->data.y;
+                                    cout<< child->data.y;
                                     cout<<endl;
                                 } 
                                 if(flag) break;
@@ -414,7 +434,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                             }
                             break;
                         }
-                        case 'X': {
+                        case 'X': {             //VLX
                             string y= (string)request.code;
                             int flag=0;
                             string tempID;
@@ -435,7 +455,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                                     flag=1;
                                     cout<<y;
                                     cout<<": ";
-                                    cout<< setprecision(6) << child->data.x;
+                                    cout<< child->data.x;
                                     cout<<endl;
                                 } 
                                 if(flag) break;
@@ -448,7 +468,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                             }
                             break;
                         }
-                        case 'T': {
+                        case 'T': {             //VLT
                             string y= (string)request.code;
                             int flag=0;
                             string tempID;
@@ -487,7 +507,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                             }
                             break; 
                         }
-                        default: {
+                        case 'S': {//VLS
                             /////////////////////////////////////////////////////////////////////////////
                             string y= (string)request.code;
                             int flag=0;
@@ -505,7 +525,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                                 tempID=(string)child->data.id;
                                 if (tempID==rID){
                                     while (child->pNext != NULL){
-                                        if (distanceVR(child->data.x,child->data.y,child->pNext->data.x,child->pNext->data.y) == 0){
+                                        if (distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x) == 0){
                                             tempx=child->pNext->data.x;
                                             tempy=child->pNext->data.y;
                                             flag=1;
@@ -533,12 +553,16 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                             }
                             break;
                         }
+                        default: {
+                            cout<<request.code<<": Failed"<<endl;
+                            break;
+                        }
                     }
                     break;
                 }
                 case 'C': {
                     switch(request.code[2]) {
-                        case 'R': {
+                        case 'R': {     //VCR
                             string y= (string)request.code;
                             int flag=0;
                             string tempID;
@@ -567,7 +591,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                             }
                             break;
                         }
-                        default: {
+                        case 'L': {             //VCL
                             string y= (string)request.code;
                             int flag=0;
                             string tempID;
@@ -583,7 +607,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                                 tempID=(string)child->data.id;
                                 if (tempID==rID){
                                     while (child->pNext != NULL){
-                                        //if (distanceVR(child->data.x,child->data.y,child->pNext->data.x,child->pNext->data.y) > 0){
+                                        //if (distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x) > 0){
                                             longdis =   longdis + distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x);
                                         //} 
                                         child=child->pNext;
@@ -591,7 +615,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                                     flag=1;
                                     cout<<y;
                                     cout<<": ";
-                                    cout<< setprecision(6) << longdis;
+                                    cout << longdis;
                                     cout<<endl;
                                 } 
                                 if(flag) break;
@@ -604,12 +628,15 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                             }
                             break;
                         }
+                        default: {
+                            cout<<request.code<<": Failed"<<endl;
+                        }
                     }
                     break;
                 }
                 case 'M': {
                     switch(request.code[2]) {
-                        case 'T': {
+                        case 'T': {    // VMT
                             string y= (string)request.code;
                             int flag=0;
                             string tempID;
@@ -625,7 +652,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                                 tempID=(string)child->data.id;
                                 if (tempID==rID){
                                     while (child->pNext != NULL){
-                                        if (distanceVR(child->data.x,child->data.y,child->pNext->data.x,child->pNext->data.y) > 0){
+                                        if (distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x) > 0){
                                             tempmax =   tempmax + difftime(child->pNext->data.timestamp,child->data.timestamp);
                                         } 
                                         child=child->pNext;
@@ -646,7 +673,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                             }
                             break;
                         }
-                        default: {
+                        case 'S': {   //VMS
                             string y= (string)request.code;
                             int flag=0;
                             string tempID;
@@ -662,7 +689,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                                 tempID=(string)child->data.id;
                                 if (tempID==rID){
                                     while (child->pNext != NULL){
-                                        if (distanceVR(child->data.x,child->data.y,child->pNext->data.x,child->pNext->data.y) == 0){
+                                        if (distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x) == 0){
                                             if (tempmax < difftime(child->pNext->data.timestamp,child->data.timestamp))
                                             tempmax=difftime(child->pNext->data.timestamp,child->data.timestamp);
                                         } 
@@ -686,216 +713,225 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                             }
                             break;
                         }
+                        default: {
+                            cout<<request.code<<": Failed"<<endl;
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case 'A': {
+                    switch(request.code[2]) {
+                        case 'S': {  // VAS
+                            string y= (string)request.code;
+                            int flag=0;
+                            string tempID;
+                            string rID;
+                            double tempmax=0;
+                            int t=0;
+                            const char* s = "S";
+                            char* tID=strtok(request.code,s);
+                            tID=strtok(NULL,s);
+                            rID=(string)tID;
+                            L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
+                            while (pFirst!= NULL){
+                                L1Item<VRecord>* child = pFirst->data.getpHead();
+                                tempID=(string)child->data.id;
+                                if (tempID==rID){
+                                    while (child->pNext != NULL){
+                                        t++;
+                                        tempmax= tempmax + distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x);       
+                                        child=child->pNext;
+                                    }
+                                    flag=1;
+                                    cout<<y;
+                                    cout<<": ";
+                                    //cout<<tID <<" ";
+                                    cout<< tempmax/t*1000<< " meter";
+                                    cout<<endl;
+                                } 
+                                if(flag) break;
+                                pFirst=pFirst->pNext;
+                            }
+                            if (!flag){
+                                cout<<y;
+                                cout<<": Failed";
+                                cout<<endl;
+                            }
+                            break;
+                        }
+                        default:{
+                            cout<<request.code<<": Failed"<<endl;
+                            break;
+                        }
                     }
                     break;
                 }
                 default: {
-                    string y= (string)request.code;
-                    int flag=0;
-                    string tempID;
-                    string rID;
-                    double tempmax=0;
-                    int t=0;
-                    const char* s = "S";
-                    char* tID=strtok(request.code,s);
-                    tID=strtok(NULL,s);
-                    rID=(string)tID;
-                    L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
-                    while (pFirst!= NULL){
-                        L1Item<VRecord>* child = pFirst->data.getpHead();
-                        tempID=(string)child->data.id;
-                        if (tempID==rID){
-                            while (child->pNext != NULL){
-                                t++;
-                                tempmax= tempmax + distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x);       
-                                child=child->pNext;
-                            }
-                            flag=1;
-                            cout<<y;
-                            cout<<": ";
-                            //cout<<tID <<" ";
-                            cout<<setprecision(6)<< tempmax/t*1000<< " meter";
-                            cout<<endl;
-                        } 
-                        if(flag) break;
-                        pFirst=pFirst->pNext;
-                    }
-                    if (!flag){
-                        cout<<y;
-                        cout<<": Failed";
-                        cout<<endl;
-                    }
+                    cout<<request.code<<": Failed"<<endl;
                     break;
                 }
             }
             break;
         }
-        case 'M': {
+        case 'M': {             
             switch(request.code[1]) {
                 case 'S': {
-                    L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
-                    double tempstop=0 ;
-                    double maxstop=0 ; 
-                    char* idstop ;
-                    // char* tempid;
-                    // int k= 1;
-                    int flag=0;
-                    while (pFirst!= NULL){
-                        // k=1;
-                        L1Item<VRecord>* child = pFirst->data.getpHead();
-                        while (child->pNext != NULL)
-                        {
-                            // k++;
-                            if (distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x) == 0){
-                                tempstop =   tempstop + difftime(child->pNext->data.timestamp,child->data.timestamp);
-                            } 
-                            child=child->pNext;
+                    switch(request.code[2]) {
+                        case 'T':{                          //MST
+                            L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
+                            double tempstop=0 ;
+                            double maxstop=0 ; 
+                            char* idstop ;
+                            int flag=0;
+                            while (pFirst!= NULL){
+                                L1Item<VRecord>* child = pFirst->data.getpHead();
+                                while (child->pNext != NULL){
+                                    if (distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x) == 0){
+                                        tempstop =   tempstop + difftime(child->pNext->data.timestamp,child->data.timestamp);
+                                    }    
+                                    child=child->pNext;
+                                }
+                                if ( tempstop > maxstop ){
+                                    maxstop = tempstop;
+                                    idstop=pFirst->data.getpHead()->data.id;
+                                    flag=1;
+                                }
+                                tempstop=0;
+                                pFirst=pFirst->pNext;
+                            }
+                            if(flag){
+                                cout<<request.code;
+                                cout<<": ";                        
+                                cout<< maxstop <<"s"<<endl ;
+                            }else{
+                                cout<<request.code;
+                                cout<<": Failed";                        
+                            }
+                            break;
                         }
-                        if ( tempstop > maxstop ){
-                            maxstop = tempstop;
-                            idstop=pFirst->data.getpHead()->data.id;
-                            flag=1;
+                        default: {
+                            cout<<request.code<<": Failed"<<endl;
+                            break;
                         }
-                        
-                        // if (tempstop>0){
-                        //     tempid=pFirst->data.getpHead()->data.id;
-                        //     cout<< tempstop << " la "<< tempmax <<" s "<< k <<" record"<<endl ;
-                        // }
-                        // else q++;
-                        tempstop=0;
-                        pFirst=pFirst->pNext;
                     }
-                    if(flag){
-                        cout<<request.code;
-                        cout<<": ";
-                        //cout << idstop <<" ";
-                        cout<< setprecision(0) << maxstop <<"s"<<endl ;
-                    }else{
-                        cout<<request.code;
-                        cout<<": Failed";                        
-                    }
-                    break;
+                    break; 
                 }
                 case 'R': {
-                    L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
-                    //char** maxid = new char*[pGList->NewDataList.getSize()]; 
-                    char* maxid;
-                    size_t max = pFirst->data.getSize();
-                    while (pFirst->pNext!= NULL){
-                        pFirst=pFirst->pNext;
-                        if (max < pFirst->data.getSize()) {
-                            max = pFirst->data.getSize();
-                            maxid = pFirst->data.getpHead()->data.id;
+                    switch(request.code[2]) {
+                        case 'V':{   //MRV
+                            L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
+                            //char** maxid = new char*[pGList->NewDataList.getSize()]; 
+                            char* maxid;
+                            size_t max = pFirst->data.getSize();
+                            while (pFirst->pNext!= NULL){
+                                pFirst=pFirst->pNext;
+                                if (max < pFirst->data.getSize()) {
+                                    max = pFirst->data.getSize();
+                                    maxid = pFirst->data.getpHead()->data.id;
+                                }
+                            }
+                            cout<<"MRV: ";
+                            cout<< maxid<<endl;
+                            break; 
+                        }
+                        default: {
+                            cout<<request.code<<": Failed"<<endl;
+                            break;
                         }
                     }
-                    // pFirst = pGList->NewDataList.getpHead();
-                    // int t=0;
-                    // while (pFirst->pNext!= NULL){
-                    //     pFirst=pFirst->pNext;
-                    //     if (max == pFirst->data.getSize()) {
-                    //         //maxid [t] = pFirst->data.getpHead()->data.id;
-                    //         t++;
-                    //     }
-                    // }
-                   /* cout<<maxid<<endl;
-                    cout<<max<<endl;
-                    pFirst=pFirst->pNext;
-                    maxid = pFirst->data.getpHead()->data.id;
-                    max = pFirst->data.getSize();*/
-                    //cout<< "thiet bi co record nhieu nhat: " <<maxid<< " la "<<max<<" record"<<endl;
-                    //for (int i=0; i < t;i++){
-                        cout<<"MRV: ";
-                        cout<< maxid<<endl;
-                        //cout<<" "<<"la "<<max<<" record"<<endl;
-                    //}
                     break;
                 }
                 case 'T': {
-                    L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
-                    double tempmax=0 ;
-                    double maxtime=0 ;
-                    int flag=0; 
-                    char* idtime ;
-                    // char* tempid;
-                    // int k= 1;
-                    while (pFirst!= NULL){
-                        // k=1;
-                        L1Item<VRecord>* child = pFirst->data.getpHead();
-                        while (child->pNext != NULL)
-                        {
-                            // k++;
-                            if (distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x) > 0){
-                                tempmax =   tempmax + difftime(child->pNext->data.timestamp,child->data.timestamp);
-                            } 
-                            child=child->pNext;
+                    switch(request.code[2]) {
+                        case 'V':{   //MTV
+                            L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
+                            double tempmax=0 ;
+                            double maxtime=0 ;
+                            int flag=0; 
+                            char* idtime ;
+                            while (pFirst!= NULL){
+                                L1Item<VRecord>* child = pFirst->data.getpHead();
+                                while (child->pNext != NULL){
+                                    if (distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x) > 0){
+                                        tempmax =   tempmax + difftime(child->pNext->data.timestamp,child->data.timestamp);
+                                    } 
+                                    child=child->pNext;
+                                }
+                                if ( tempmax > maxtime ){
+                                    maxtime=tempmax;
+                                    idtime=pFirst->data.getpHead()->data.id;
+                                    flag=1;
+                                }
+                                tempmax=0;
+                                pFirst=pFirst->pNext;
+                            }
+                            if(flag){
+                                cout<<request.code;
+                                cout<<": ";
+                                cout<<idtime <<endl;
+                            }else{
+                                cout<<request.code;
+                                cout<<": Failed";
+                            }
+                            break;
                         }
-                        if ( tempmax > maxtime ){
-                            maxtime=tempmax;
-                            idtime=pFirst->data.getpHead()->data.id;
-                            flag=1;
+                        default: {
+                            cout<<request.code<<": Failed"<<endl;
+                            break;
                         }
-                        
-                        // if (tempmax>0){
-                        //     tempid=pFirst->data.getpHead()->data.id;
-                        //     cout<< tempid << " la "<< tempmax <<" s "<< k <<" record"<<endl ;
-                        // }
-                        // else q++;
-                        tempmax=0;
-                        pFirst=pFirst->pNext;
                     }
-                    if(flag){
-                        cout<<request.code;
-                        cout<<": ";
-                        cout<<idtime <<endl;
-                        //cout<< " la "<< maxtime <<" s"<<endl ;
-                    }else{
-                        cout<<request.code;
-                        cout<<": Failed";
+                    break;  
+                }
+                case 'V': {
+                    switch(request.code[2]) {
+                        case 'V':{   //MVV
+                            L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
+                            double temptime=0 ;
+                            double tempdis=0 ;
+                            double tempsp =0;
+                            double maxsp =0 ;
+                            int flag=0;
+                            char* idtime ;
+                            while (pFirst!= NULL){   
+                                L1Item<VRecord>* child = pFirst->data.getpHead();
+                                while (child->pNext != NULL){ 
+                                    if (distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x) > 0){
+                                        temptime =   temptime + difftime(child->pNext->data.timestamp,child->data.timestamp);
+                                        tempdis =   tempdis + distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x);
+                                    } 
+                                    child=child->pNext;
+                                }
+                                tempsp = tempdis/temptime;
+                                if ( tempsp > maxsp ){
+                                    maxsp=tempsp;
+                                    idtime=pFirst->data.getpHead()->data.id;
+                                    flag=1;
+                                }
+                                temptime=0;
+                                tempdis =0;
+                                tempsp  =0;
+                                pFirst=pFirst->pNext;
+                            }
+                            if (flag){
+                                cout<<request.code;
+                                cout<<": ";
+                                cout<< idtime <<endl;
+                            }else{
+                                cout<<request.code;
+                                cout<<": Failed";
+                            }
+                            break;
+                        }
+                        default: {
+                            cout<<request.code<<": Failed"<<endl;
+                            break;
+                        }
                     }
                     break;
                 }
                 default: {
-                    L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
-                    double temptime=0 ;
-                    double tempdis=0 ;
-                    double tempsp =0;
-                    double maxsp =0 ;
-                    int flag=0;
-                    char* idtime ;
-                    // char* tempid;
-                    // int k= 1;
-                    while (pFirst!= NULL){
-                        // k=1;
-                        L1Item<VRecord>* child = pFirst->data.getpHead();
-                        while (child->pNext != NULL)
-                        {
-                            // k++;
-                            if (distanceVR(child->data.x,child->data.y,child->pNext->data.x,child->pNext->data.y) > 0){
-                                temptime =   temptime + difftime(child->pNext->data.timestamp,child->data.timestamp);
-                                tempdis =   tempdis + distanceVR(child->data.x,child->data.y,child->pNext->data.x,child->pNext->data.y);
-                            } 
-                            child=child->pNext;
-                        }
-                        tempsp = tempdis/temptime;
-                        if ( tempsp > maxsp ){
-                            maxsp=tempsp;
-                            idtime=pFirst->data.getpHead()->data.id;
-                            flag=1;
-                        }
-                        temptime=0;
-                        tempdis =0;
-                        tempsp  =0;
-                        pFirst=pFirst->pNext;
-                    }
-                    if (flag){
-                        cout<<request.code;
-                        cout<<": ";
-                        cout<< idtime <<endl;
-                        //cout<< " la "<< maxsp <<" m/s"<<endl ;
-                    }else{
-                        cout<<request.code;
-                        cout<<": Failed";
-                    }
+                    cout<<request.code<<": Failed"<<endl;
                     break;
                 }
             }
@@ -904,197 +940,236 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
         case 'L': {
             switch(request.code[1]) {
                 case 'R': {
-                    L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
-                    //char** minid = new char*[pGList->NewDataList.getSize()];  
-                    char * minid;
-                    int flag=0;
-                    size_t min = pFirst->data.getSize();
-                    while (pFirst->pNext!= NULL){
-                        pFirst=pFirst->pNext;
-                        if (min > pFirst->data.getSize()) {
-                            min = pFirst->data.getSize();
+                    switch(request.code[2]) {
+                        case 'V':{   //LRV
+                            L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
+                            //char** minid = new char*[pGList->NewDataList.getSize()];  
+                            char * minid;
+                            int flag=0;
+                            size_t min = pFirst->data.getSize();
+                            while (pFirst->pNext!= NULL){
+                                pFirst=pFirst->pNext;
+                                if (min > pFirst->data.getSize()) {
+                                    min = pFirst->data.getSize();
+                                }
+                            }
+                            pFirst = pGList->NewDataList.getpHead();
+                            int t=0;
+                            while (pFirst->pNext!= NULL){
+                                pFirst=pFirst->pNext;
+                                if (min == pFirst->data.getSize()) {
+                                    flag=1;
+                                    minid= pFirst->data.getpHead()->data.id;
+                                    cout<<request.code;
+                                    cout<<": ";
+                                    cout<<minid;
+                                    cout<<endl;
+                                    break;
+                                }
+                            }
+                            if (!flag){
+                                cout<<request.code;
+                                cout<<": Failed";
+                            } 
+                            break;
                         }
-                    }
-                    pFirst = pGList->NewDataList.getpHead();
-                    int t=0;
-                    while (pFirst->pNext!= NULL){
-                        pFirst=pFirst->pNext;
-                        if (min == pFirst->data.getSize()) {
-                            //minid[t] = pFirst->data.getpHead()->data.id;
-                            //t++;
-                            flag=1;
-                            minid= pFirst->data.getpHead()->data.id;
-                            cout<<request.code;
-                            cout<<": ";
-                            cout<<minid;
-                            cout<<endl;
+                        default: {
+                            cout<<request.code<<": Failed"<<endl;
                             break;
                         }
                     }
-                    if (!flag){
-                        cout<<request.code;
-                        cout<<": Failed";
-                    } 
-                    // cout<< "thiet bi co record it nhat: ";
-                    // for (int i=0; i < t;i++){
-                    //     cout<<minid[i]<<" ";
-                    // }
-                    // cout<<"la "<<min<<" record"<<endl;
+                    break;     
+                }
+                case 'P': {
+                    switch(request.code[2]) {
+                        case 'V':{   //LPV
+                            L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
+                            double maxdis=0 ;
+                            double tempdis=0 ;
+                            char* iddis ;
+                            int flag=0;
+                            while (pFirst!= NULL){                        
+                                L1Item<VRecord>* child = pFirst->data.getpHead();
+                                while (child->pNext != NULL){
+                                    if (distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x) > 0){
+                                        tempdis =   tempdis + distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x);
+                                    } 
+                                child=child->pNext;
+                                }
+                                if ( tempdis > maxdis ){
+                                    maxdis=tempdis;
+                                    iddis=pFirst->data.getpHead()->data.id;
+                                    flag=1;
+                                }
+                                tempdis =0;
+                                pFirst=pFirst->pNext;
+                            }
+                            if(flag){
+                                cout<<request.code;
+                                cout<<": ";
+                                cout<< iddis<<endl;   
+                            }else{
+                                cout<<request.code;
+                                cout<<": Failed";                        
+                            }              
+                            break;
+                        }
+                        default: {
+                            cout<<request.code<<": Failed"<<endl;
+                            break;
+                        } 
+                    }
                     break;
                 }
                 default: {
- ////////////////////////////////////////////////////////////////////////////////////////////////////////////////      
-                    L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
-                    double maxdis=0 ;
-                    double tempdis=0 ;
-                    char* iddis ;
-                    int flag=0;
-                    // char* tempid;
-                    // int k= 1;
-                    while (pFirst!= NULL){
-                        // k=1;
-                        L1Item<VRecord>* child = pFirst->data.getpHead();
-                        while (child->pNext != NULL)
-                        {
-                            // k++;
-                            if (distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x) > 0){
-                                tempdis =   tempdis + distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x);
-                            } 
-                            child=child->pNext;
-                        }
-                        if ( tempdis > maxdis ){
-                            maxdis=tempdis;
-                            iddis=pFirst->data.getpHead()->data.id;
-                            flag=1;
-                        }
-                        tempdis =0;
-                        pFirst=pFirst->pNext;
-                    }
-                    if(flag){
-                        cout<<request.code;
-                        cout<<": ";
-                        //cout<< " Thiet bi co hanh trinh dai nhat " ;
-                        cout<< iddis<<endl; 
-                        //cout<< " la "<< maxdis <<" m"<<endl ;  
-                    }else{
-                        cout<<request.code;
-                        cout<<": Failed";                        
-                    }              
+                    cout<<request.code<<": Failed"<<endl;
                     break;
                 }
             }
             break;
         }
         case 'S': {
-            L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
-            double mindis=0 ;
-            double tempdis=0 ;
-            int a = 0;
-            int flag=0; 
-            char* iddis;
-            while (pFirst!= NULL){
-                L1Item<VRecord>* child = pFirst->data.getpHead();
-                while (child->pNext != NULL)
-                {
-                    tempdis =   tempdis + distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x); 
-                    child=child->pNext;
+            switch(request.code[1]) {
+                case 'P': {
+                    switch(request.code[2]) {
+                        case 'V':{   //SPV
+                            L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
+                            double mindis=0 ;
+                            double tempdis=0 ;
+                            int a = 0;
+                            int flag=0; 
+                            char* iddis;
+                            while (pFirst!= NULL){
+                                L1Item<VRecord>* child = pFirst->data.getpHead();
+                                while (child->pNext != NULL){
+                                    if (distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x) > STOP){
+                                        tempdis =   tempdis + distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x); 
+                                    }
+                                    child=child->pNext;
                     
-                }
-                if (pFirst->data.getpHead()->data.id=="51B03755"){
-                    cout<<setprecision(3)<< tempdis*1000<<" ";
-                }
-                
-                if (!a) {
-                    if(tempdis > 0){
-                        mindis=tempdis;
-                        iddis=pFirst->data.getpHead()->data.id;
-                        cout<<"lay ";
-                        flag = 1;
-                        a = 1;
-                    } 
-                }
-                if ( tempdis < mindis ){
-                    if(tempdis > 0){
-                        mindis=tempdis;
-                        iddis=pFirst->data.getpHead()->data.id;
-                        cout<<"lay ";
-                        flag=1;
-                    }
-                }
-                tempdis =0;
-                pFirst=pFirst->pNext;
-            }
-            if (flag){
-                cout<<request.code;
-                cout<<": Succeed";
-                cout<< " Thiet bi co hanh trinh ngan nhat " << iddis << " la "<< mindis <<" m"<<endl ;  
-            }
-            else{
-                cout<<request.code;
-                cout<<": Failed";
-            }
-            break;
-        }
-        ///////////////////////////////////////////////////////////////////
-        default: {
-            string y= (string)request.code;
-            int flag=0;
-            string tempID;
-            string rID;
-            int t=0;
-            const char* s = "R";
-            char* tID=strtok(request.code,s);
-            tID=strtok(NULL,s);
-            rID=(string)tID;
-            L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
-            L1Item<L1List<VRecord>>* pPre =NULL;
-            while (pFirst!= NULL){
-                t++;
-                tempID=(string)pFirst->data.getpHead()->data.id;
-                if (tempID==rID){
-                    flag=1;
-                    cout<<y;
-                    cout<<": Succeed";
-                    cout<<endl;
-                    if (t==1){
-                        pGList->NewDataList.removeHead();
-                    }
-                    else{
-                        pPre->pNext=pFirst->pNext;
-                        delete pFirst;
+                                }
+                                if (pFirst->data.getpHead()->data.id=="51B03755"){
+                                    cout<<setprecision(3)<< tempdis*1000<<" ";
+                                }
+                                if (!a) {
+                                    if(tempdis > STOP){
+                                        mindis=tempdis;
+                                        iddis=pFirst->data.getpHead()->data.id;
+                                        flag = 1;
+                                        a = 1;
+                                    } 
+                                }
+                                if ( tempdis < mindis ){
+                                    if(tempdis > STOP){
+                                        mindis=tempdis;
+                                        iddis=pFirst->data.getpHead()->data.id;
+                                        flag=1;
+                                    }
+                                }
+                                tempdis =0;
+                                pFirst=pFirst->pNext;
+                            }
+                            if (flag){
+                                cout<<request.code;
+                                cout<<": Succeed";
+                                cout<< " Thiet bi co hanh trinh ngan nhat " << iddis << " la "<< mindis <<" m"<<endl ;  
+                            }
+                            else{
+                                cout<<request.code;
+                                cout<<": Failed";
+                            }
+                            break;
+                        }
+                        default: {
+                            cout<<request.code<<": Failed"<<endl;
+                            break;
+                        }
                     }
                     break;
                 }
-                pPre = pFirst;
-                pFirst=pFirst->pNext;
             }
-            t=0;
-            L1Item<VRecord>* CopyFirst = pGList->CopyDataList.getpHead();
-            L1Item<VRecord>* CopyPre =NULL;
-            while (CopyFirst!= NULL){
-                t++;
-                tempID=(string)CopyFirst->data.id;
-                if (tempID==rID){
-                    if (t==1){
-                        pGList->CopyDataList.removeHead();
+            break;      
+        }
+        ///////////////////////////////////////////////////////////////////
+        case 'R': {
+            switch(request.code[1]) {
+                case 'V': {
+                    switch(request.code[2]) {
+                        case 'R':{   //RVR
+                            string y= (string)request.code;
+                            int flag=0;
+                            string tempID;
+                            string rID;
+                            int t=0;
+                            const char* s = "R";
+                            char* tID=strtok(request.code,s);
+                            tID=strtok(NULL,s);
+                            rID=(string)tID;
+                            L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
+                            L1Item<L1List<VRecord>>* pPre =NULL;
+                            while (pFirst!= NULL){
+                                t++;
+                                tempID=(string)pFirst->data.getpHead()->data.id;
+                                if (tempID==rID){
+                                    flag=1;
+                                    cout<<y;
+                                    cout<<": Succeed";
+                                    cout<<endl;
+                                    if (t==1){
+                                        pGList->NewDataList.removeHead();
+                                    }
+                                    else{
+                                        pPre->pNext=pFirst->pNext;
+                                        delete pFirst;
+                                    }
+                                    break;
+                                }
+                                pPre = pFirst;
+                                pFirst=pFirst->pNext;
+                            }
+                            t=0;
+                            L1Item<VRecord>* CopyFirst = pGList->CopyDataList.getpHead();
+                            L1Item<VRecord>* CopyPre =NULL;
+                            while (CopyFirst!= NULL){
+                                t++;
+                                tempID=(string)CopyFirst->data.id;
+                                if (tempID==rID){
+                                    if (t==1){
+                                        pGList->CopyDataList.removeHead();
+                                    }
+                                    else{
+                                        CopyPre->pNext=CopyFirst->pNext;
+                                        delete CopyFirst;
+                                    }
+                                }
+                                CopyPre = CopyFirst;
+                                CopyFirst=CopyFirst->pNext;
+                            }
+                            if (!flag){
+                                cout<<y;
+                                cout<<": Failed";
+                                cout<<endl;
+                            }
+                            break;
+                        }
+                        default: {
+                            cout<<request.code<<": Failed"<<endl;
+                            break;
+                        }
                     }
-                    else{
-                        CopyPre->pNext=CopyFirst->pNext;
-                        delete CopyFirst;
-                    }
+                    break;
                 }
-                CopyPre = CopyFirst;
-                CopyFirst=CopyFirst->pNext;
-            }
-            if (!flag){
-                cout<<y;
-                cout<<": Failed";
-                cout<<endl;
-            }
+                default: {
+                    cout<<request.code<<": Failed"<<endl;
+                    break;
+                }
+            }   
             break;
-        }                  // RVR
+        }
+        default: {
+            cout<<request.code<<": Failed"<<endl;
+            break;
+        }               
     }
     return true;
 }
-
-
