@@ -9,6 +9,8 @@
 #include "cmath"
 #include "string.h"
 #define BST (+0)
+#define ZERO                    0e-5
+#define STOP                    5e-3
 struct Data {
     L1List<L1List<VRecord>> NewDataList;
     L1List<VRecord> CopyDataList;
@@ -152,38 +154,34 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                         }
                         default: {
                             L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
-                            int tempmove=0 ;
-                            int maxmove =0 ;
                             // int t = 0;
                             // char** idmove=new char*[pGList->NewDataList.getSize()];
-                            int flag=0; 
                             int idmove=0;
+                            int flagmov=0;
                             while (pFirst!= NULL){
                                 L1Item<VRecord>* child = pFirst->data.getpHead();
                                 while (child->pNext != NULL)
                                 {
-                                    maxmove++;
-                                    if (distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x) > 0){
-                                       tempmove++; 
+                                    
+                                    if (distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x) <= STOP){
+                                       flagmov=1;
                                     } 
                                     child=child->pNext;
                                 }
-                                if ((tempmove == maxmove )&&(tempmove > 0)) {
-                                    flag=1;
+                                if (flagmov==0) {
                                     idmove++;
                                 }
-                                tempmove=0;
-                                maxmove=0;
                                 pFirst=pFirst->pNext;
+                                flagmov = 0;
                             }
-                            if (!flag){
+                            if (idmove==0){
                                 cout<<request.code;
                                 cout<<": Failed";
+                                cout<<endl;
                             }
                             else{
                                 cout<<request.code;
-                                cout<<": Succeed ";
-                                cout<< "Thiet bi luon di chuyen va khong ngung " ;
+                                cout<<": ";
                                 cout << idmove;
                                 cout<<endl;
                             }
@@ -194,30 +192,21 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                 default: {
                     L1Item<L1List<VRecord>>* pFirst = pGList->NewDataList.getpHead();
                     double sumdis=0 ;
-                    double tempdis=0 ;
                     double record= 0;
                     double device= 0;
                     while (pFirst!= NULL){
-                        device++;
-                        record= 0;
                         L1Item<VRecord>* child = pFirst->data.getpHead();
+                        record=pFirst->data.getSize();
                         while (child->pNext != NULL)
                         {
-                            record++;
-                            if (distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x) > 0){
-                                tempdis =   tempdis + distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x);
-                            } 
+                            sumdis =   sumdis + distanceVR(child->data.y,child->data.x,child->pNext->data.y,child->pNext->data.x)*1000;
                             child=child->pNext;
                         }
-                        if (record!=0){
-                            sumdis = sumdis + (double)tempdis ;
-                        }
-                        tempdis =0;
+                        device = device + record - 1;
                         pFirst=pFirst->pNext;
                     } 
-                    cout<<"CAS: Succeed ";
-                    cout<< device;
-                    cout<< " Khoang cach trung binh khi thu thap du lieu cua tat ca cac thiet bi " << (double)sumdis/device <<" m"<<endl ;
+                    cout<<"CAS: ";
+                    cout<<setprecision(6) << sumdis/device <<" meter"<<endl ;
                     break;
                 }    //// CAS
             }
@@ -364,8 +353,8 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                                             tempy=child->pNext->data.y;
                                             flag=1;
                                             cout<<y;
-                                            cout<<": Succeed Diem dung dau tien cua thiet bi ";
-                                            cout<<tID <<" (x,y) la (";
+                                            cout<<": ";
+                                            cout<<"(";
                                             cout<<tempx;
                                             cout<<",";
                                             cout<<tempy;
@@ -381,7 +370,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                             }
                             if (!flag){
                                 cout<<y;
-                                cout<<": Failed";
+                                cout<<": non stop!";
                                 cout<<endl;
                             }
                             break;
@@ -526,8 +515,8 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                                 } 
                                 if(flag) {
                                     cout<<y;
-                                    cout<<": Succeed Diem dung cuoi cung cua thiet bi ";
-                                    cout<<tID <<" (x,y) la (";
+                                    cout<<": ";
+                                    cout<<"(";
                                     cout<< tempx;
                                     cout<<",";
                                     cout<<tempy;
@@ -539,7 +528,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                             }
                             if (!flag){
                                 cout<<y;
-                                cout<<": Failed";
+                                cout<<": non stop!";
                                 cout<<endl;
                             }
                             break;
@@ -725,7 +714,7 @@ bool processRequest(VRequest& request, L1List<VRecord>& recList, void* pGData) {
                             cout<<y;
                             cout<<": ";
                             //cout<<tID <<" ";
-                            cout<<setprecision(6)<< tempmax/t*1000;
+                            cout<<setprecision(6)<< tempmax/t*1000<< " meter";
                             cout<<endl;
                         } 
                         if(flag) break;
